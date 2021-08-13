@@ -1,11 +1,11 @@
 
 micronaut:
   application:
-    name: pix
+    name: chavepix
 
 datasources:
   default:
-    url: jdbc:postgresql://localhost:5432/pix
+    url: jdbc:postgresql://localhost:5432/chavepix
     driverClassName: org.postgresql.Driver
     username: postgres
     password: password
@@ -13,3 +13,6 @@ datasources:
     dialect: POSTGRES
 
 jpa.default.properties.hibernate.hbm2ddl.auto: update
+
+clients:
+  itau: http://localhost:9091/api/v1
