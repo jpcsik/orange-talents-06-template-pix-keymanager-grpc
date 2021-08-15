@@ -3,6 +3,7 @@ package br.com.zupacademy.jpcsik.chavepix
 import br.com.zupacademy.jpcsik.NovaChavePixRequest
 import br.com.zupacademy.jpcsik.NovaChavePixResponse
 import br.com.zupacademy.jpcsik.clients.ItauClient
+import io.micronaut.http.HttpResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional
@@ -10,8 +11,7 @@ import javax.validation.ConstraintViolationException
 
 @Singleton
 open class ProcessadorNovaChaveRequest(
-    @Inject val repository: ChavePixRepository,
-    @Inject val client: ItauClient
+    @Inject private val repository: ChavePixRepository
 ) {
 
     @Throws(
@@ -20,15 +20,12 @@ open class ProcessadorNovaChaveRequest(
         NoSuchElementException::class
     )
     @Transactional
-    open fun processar(request: NovaChavePixRequest): NovaChavePixResponse {
-
-        //Faz a requisicao para capturar os dados da conta no servico externo
-        val response = client.consultaContas(request.clienteId, request.tipoConta.name)
+    open fun processar(request: NovaChavePixRequest, contaResponse: HttpResponse<ContaResponse>): NovaChavePixResponse {
 
         //Cria conta para ser associada a chave pix
-        val conta = response.body()?.toModel() ?: throw NoSuchElementException("Cliente não encontrado!")
+        val conta = contaResponse.body()?.toModel() ?: throw NoSuchElementException("Cliente não encontrado!")
 
-        //Criar uma nova chave pix
+        //Cria uma nova chave pix
         val novaChave = request.toModel(conta)
 
         //Verifica se chave já existe
@@ -36,11 +33,7 @@ open class ProcessadorNovaChaveRequest(
             .let { if (it) throw IllegalStateException("Chave já cadastrada!") }
 
         //Salva chave no banco de dados
-        try {
-            repository.save(novaChave)
-        } catch (ex: ConstraintViolationException) {
-            throw IllegalArgumentException(ex.message)
-        }
+        repository.save(novaChave)
 
         //Cria a resposta
         return NovaChavePixResponse.newBuilder()

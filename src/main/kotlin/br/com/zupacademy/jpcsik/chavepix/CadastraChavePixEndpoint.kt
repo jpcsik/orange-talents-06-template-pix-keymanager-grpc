@@ -3,6 +3,7 @@ package br.com.zupacademy.jpcsik.chavepix
 import br.com.zupacademy.jpcsik.KeyManagerGrpcServiceGrpc
 import br.com.zupacademy.jpcsik.NovaChavePixRequest
 import br.com.zupacademy.jpcsik.NovaChavePixResponse
+import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
@@ -10,7 +11,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CadastraChavePixEndpoint(
-    @Inject val processador: ProcessadorNovaChaveRequest
+    @Inject private val processador: ProcessadorNovaChaveRequest,
+    @Inject private val client: ItauClient
 ) : KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceImplBase() {
 
     override fun cadastrar(request: NovaChavePixRequest, responseObserver: StreamObserver<NovaChavePixResponse>) {
@@ -20,8 +22,11 @@ class CadastraChavePixEndpoint(
             //Metodo que valida os dados da requisicao
             request.validarRequest()
 
+            //Faz a requisicao para capturar os dados da conta no servico externo
+            val contaResponse = client.consultaContas(request.clienteId, request.tipoConta.name)
+
             //Classe responsavel por processar a requisicao
-            val response = processador.processar(request)
+            val response = processador.processar(request, contaResponse)
 
             //Resposde o client com a nova chave pix
             responseObserver.onNext(response)
@@ -57,8 +62,7 @@ class CadastraChavePixEndpoint(
 
             responseObserver.onError(
                 Status.INTERNAL
-                    .withDescription(ex.message)
-                    .withCause(ex.cause)
+                    .withDescription("Erro interno do servidor!")
                     .asRuntimeException()
             )
 

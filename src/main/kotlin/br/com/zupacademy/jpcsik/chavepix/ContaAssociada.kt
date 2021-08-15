@@ -3,7 +3,7 @@ package br.com.zupacademy.jpcsik.chavepix
 import javax.persistence.Embeddable
 
 @Embeddable
-class ContaAssociada(
+data class ContaAssociada(
     val instituicao: String,
     val agencia: String,
     val numero: String,
