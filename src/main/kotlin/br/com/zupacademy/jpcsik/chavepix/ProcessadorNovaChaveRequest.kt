@@ -2,12 +2,10 @@ package br.com.zupacademy.jpcsik.chavepix
 
 import br.com.zupacademy.jpcsik.NovaChavePixRequest
 import br.com.zupacademy.jpcsik.NovaChavePixResponse
-import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.micronaut.http.HttpResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional
-import javax.validation.ConstraintViolationException
 
 @Singleton
 open class ProcessadorNovaChaveRequest(

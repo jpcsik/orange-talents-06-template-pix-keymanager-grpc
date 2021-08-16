@@ -4,7 +4,6 @@ import br.com.zupacademy.jpcsik.TipoChave
 import br.com.zupacademy.jpcsik.TipoConta
 import org.hibernate.annotations.GenericGenerator
 import java.time.LocalDateTime
-import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.PastOrPresent
 import javax.validation.constraints.Size
@@ -12,7 +11,7 @@ import javax.validation.constraints.Size
 @Entity
 class ChavePix(
     @Column(nullable = false)
-    val clienteId: UUID,
+    val clienteId: String,
 
     @Column(nullable = false)
     val tipoConta: TipoConta,

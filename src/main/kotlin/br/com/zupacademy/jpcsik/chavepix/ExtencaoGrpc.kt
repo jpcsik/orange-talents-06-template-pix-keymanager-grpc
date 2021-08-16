@@ -27,7 +27,7 @@ fun NovaChavePixRequest.validarRequest() {
 //Converte a request para a classe de dominio
 fun NovaChavePixRequest.toModel(conta: ContaAssociada): ChavePix {
     return ChavePix(
-        clienteId = UUID.fromString(this.clienteId),
+        clienteId = this.clienteId,
         tipoConta = this.tipoConta,
         tipoChave = this.tipoChave,
         conta = conta,

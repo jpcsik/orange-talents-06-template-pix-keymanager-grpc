@@ -8,7 +8,7 @@ data class ContaResponse(
     val titular: Map<String, String>
 ) {
 
-    fun toModel(): ContaAssociada{
+    fun toModel(): ContaAssociada {
         return ContaAssociada(
             instituicao = this.instituicao["nome"]!!,
             agencia = this.agencia,

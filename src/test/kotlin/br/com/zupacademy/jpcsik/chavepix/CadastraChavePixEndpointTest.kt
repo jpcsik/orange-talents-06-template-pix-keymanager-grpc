@@ -23,7 +23,7 @@ import javax.inject.Singleton
 @MicronautTest(transactional = false)
 internal class CadastraChavePixEndpointTest(
     @Inject val repository: ChavePixRepository,
-    @Inject val grpcClient: KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceBlockingStub
+    @Inject val grpcClient: CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub
 ) {
 
     @field:Inject
@@ -161,7 +161,7 @@ internal class CadastraChavePixEndpointTest(
         //cenario
         repository.save(
             ChavePix(
-                clienteId = UUID.randomUUID(),
+                clienteId = UUID.randomUUID().toString(),
                 tipoConta = TipoConta.CONTA_CORRENTE,
                 tipoChave = TipoChave.CPF,
                 conta = contaResponsePadrao.toModel(),
@@ -235,8 +235,8 @@ internal class CadastraChavePixEndpointTest(
     @Factory
     private class Clients {
         @Singleton
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceBlockingStub {
-            return KeyManagerGrpcServiceGrpc.newBlockingStub(channel)
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub {
+            return CadastrarChaveServiceGrpc.newBlockingStub(channel)
         }
 
     }

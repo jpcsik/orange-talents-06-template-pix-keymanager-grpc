@@ -7,8 +7,21 @@ option objc_class_prefix = "HLW";
 
 package br.com.zupacademy.jpcsik;
 
-service KeyManagerGrpcService {
+service CadastrarChaveService {
   rpc cadastrar (NovaChavePixRequest) returns (NovaChavePixResponse) {}
+}
+
+service RemoverChaveService {
+  rpc removerChave (RemoverChaveRequest) returns (RemoverChaveResponse) {}
+}
+
+message RemoverChaveRequest {
+  string pixId = 1;
+  string clienteId = 2;
+}
+
+message RemoverChaveResponse {
+  string mensagem = 1;
 }
 
 message NovaChavePixRequest {

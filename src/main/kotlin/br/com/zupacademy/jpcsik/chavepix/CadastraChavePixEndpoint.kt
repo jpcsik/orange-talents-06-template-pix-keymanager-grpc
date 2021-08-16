@@ -1,8 +1,6 @@
 package br.com.zupacademy.jpcsik.chavepix
 
-import br.com.zupacademy.jpcsik.KeyManagerGrpcServiceGrpc
-import br.com.zupacademy.jpcsik.NovaChavePixRequest
-import br.com.zupacademy.jpcsik.NovaChavePixResponse
+import br.com.zupacademy.jpcsik.*
 import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
@@ -13,10 +11,9 @@ import javax.inject.Singleton
 class CadastraChavePixEndpoint(
     @Inject private val processador: ProcessadorNovaChaveRequest,
     @Inject private val client: ItauClient
-) : KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceImplBase() {
+) : CadastrarChaveServiceGrpc.CadastrarChaveServiceImplBase() {
 
     override fun cadastrar(request: NovaChavePixRequest, responseObserver: StreamObserver<NovaChavePixResponse>) {
-
         try {
 
             //Metodo que valida os dados da requisicao
@@ -67,7 +64,6 @@ class CadastraChavePixEndpoint(
             )
 
         }
-
     }
 
 }
