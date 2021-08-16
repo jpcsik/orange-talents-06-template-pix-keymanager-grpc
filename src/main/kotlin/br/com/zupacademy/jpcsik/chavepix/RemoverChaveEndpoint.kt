@@ -32,24 +32,35 @@ class RemoverChaveEndpoint(
         //Procura pela chave pix relacionada ao cliente
         val possivelChave = repository.findByPixIdAndClienteId(request.pixId, request.clienteId)
 
-        //Caso nao seja encontrada retorna not found
-        if (possivelChave.isEmpty) {
-            responseObserver.onError(
-                Status.NOT_FOUND
-                    .withDescription("Chave Pix não foi encontrada para o cliente: ${request.clienteId}")
-                    .asRuntimeException()
-            )
+
+        when {
+            //Caso nao seja encontrada retorna not found
+            possivelChave.isEmpty -> {
+                responseObserver.onError(
+                    Status.NOT_FOUND
+                        .withDescription("Chave Pix não foi encontrada para o cliente: ${request.clienteId}")
+                        .asRuntimeException()
+                )
+            }
+
+            possivelChave.isPresent -> {
+                //Deleta a chave pix selecionada
+                repository.deleteById(request.pixId)
+
+                //Resposta para o client
+                responseObserver.onNext(
+                    RemoverChaveResponse.newBuilder()
+                        .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
+                        .build()
+                )
+
+                responseObserver.onCompleted()
+            }
+
+            else -> responseObserver.onCompleted()
+
         }
 
-        //Deleta a chave pix selecionada
-        repository.deleteById(request.pixId)
-
-        //Resposta para o client
-        responseObserver.onNext(RemoverChaveResponse.newBuilder()
-            .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
-            .build())
-
-        responseObserver.onCompleted()
     }
 }
 

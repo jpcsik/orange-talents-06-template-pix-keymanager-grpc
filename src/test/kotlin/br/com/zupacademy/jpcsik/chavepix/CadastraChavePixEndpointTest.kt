@@ -233,7 +233,7 @@ internal class CadastraChavePixEndpointTest(
     }
 
     @Factory
-    private class Clients {
+    private class ClientsCadastrar {
         @Singleton
         fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub {
             return CadastrarChaveServiceGrpc.newBlockingStub(channel)
