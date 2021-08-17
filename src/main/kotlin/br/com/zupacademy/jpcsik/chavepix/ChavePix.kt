@@ -25,7 +25,7 @@ class ChavePix(
 
     @field:Size(max = 77)
     @Column(nullable = false, unique = true)
-    val valorChave: String
+    var valorChave: String
 ) {
     @Id
     @GeneratedValue(generator = "UUID")

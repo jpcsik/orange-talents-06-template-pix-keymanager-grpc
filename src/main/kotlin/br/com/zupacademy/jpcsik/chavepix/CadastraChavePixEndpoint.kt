@@ -21,37 +21,27 @@ class CadastraChavePixEndpoint(
         try {
             request.validarRequest()
 
-            //Faz a requisicao para capturar os dados da conta no servico externo
-            client.consultaContas(request.clienteId, request.tipoConta.name).let {contaResponse ->
-                val contaBody = contaResponse.body() ?: throw NoSuchElementException("Conta não foi encontrada!")
-
-                //Cria chave pix no servico externo do banco central
-                val bancoCentralResponse = bancoCentral.criarChave(CreatePixKeyRequest(contaBody, request))
-
-                //Classe responsavel por processar nova chave pix
-                processador.processar(request, contaBody, bancoCentralResponse)
-                    .let { responseObserver.onNext(it) }
-            }
+            //Classe responsavel por processar nova chave pix
+            processador.processar(request).let { responseObserver.onNext(it) }
             responseObserver.onCompleted()
 
-        //Tratamentos para as possiveis exceptions
+            //Tratamentos para as possiveis exceptions
         } catch (ex: Exception) {
             when (ex) {
                 is IllegalArgumentException -> responseObserver.onError(
                     Status.INVALID_ARGUMENT.withDescription(ex.message).asRuntimeException()
                 )
-                is IllegalStateException -> responseObserver.onError(
+                is IllegalAccessException -> responseObserver.onError(
                     Status.ALREADY_EXISTS.withDescription(ex.message).asRuntimeException()
                 )
                 is NoSuchElementException -> responseObserver.onError(
                     Status.NOT_FOUND.withDescription(ex.message).asRuntimeException()
                 )
-                is HttpClientResponseException -> when(ex.status.code){
-                    400 -> responseObserver.onError(Status.INVALID_ARGUMENT .withDescription(ex.message) .asRuntimeException())
-                    404 -> responseObserver.onError(Status.NOT_FOUND .withDescription(ex.message) .asRuntimeException())
-                    422 -> responseObserver.onError(Status.ALREADY_EXISTS .withDescription(ex.message) .asRuntimeException())
-                }
-                else -> responseObserver.onError(Status.INTERNAL.withDescription(ex.message).asRuntimeException())
+                is IllegalStateException -> responseObserver.onError(
+                    Status.INTERNAL.withDescription(ex.message).asRuntimeException()
+                )
+
+                else -> responseObserver.onError(Status.UNAVAILABLE.withDescription(ex.message).asRuntimeException())
             }
         }
     }

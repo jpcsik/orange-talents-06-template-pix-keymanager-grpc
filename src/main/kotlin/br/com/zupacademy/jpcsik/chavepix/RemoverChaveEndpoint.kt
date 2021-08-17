@@ -7,16 +7,19 @@ import br.com.zupacademy.jpcsik.clients.BancoCentralClient
 import br.com.zupacademy.jpcsik.clients.DeletePixKeyRequest
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.transaction.Transactional
 
 @Singleton
-class RemoverChaveEndpoint(
+open class RemoverChaveEndpoint(
     @Inject private val repository: ChavePixRepository,
     @Inject private val bancoCentralClient: BancoCentralClient
 ) : RemoverChaveServiceGrpc.RemoverChaveServiceImplBase() {
 
+    @Transactional
     override fun removerChave(request: RemoverChaveRequest, responseObserver: StreamObserver<RemoverChaveResponse>) {
 
         //Verifica se os dados da requisicao sao validos
@@ -37,7 +40,7 @@ class RemoverChaveEndpoint(
         val possivelChave = repository.findByPixIdAndClienteId(request.pixId, request.clienteId)
 
         when {
-            //Caso nao seja encontrada retorna not found
+            //Caso a chave nao seja encontrada retorna not found
             possivelChave.isEmpty -> {
                 responseObserver.onError(
                     Status.NOT_FOUND
@@ -49,27 +52,25 @@ class RemoverChaveEndpoint(
             possivelChave.isPresent -> {
                 val pixId = possivelChave.get().pixId!!
 
-                try{
-                    //Faz requisicao para deletar chave no banco central
-                    bancoCentralClient.deletaChave(pixId, DeletePixKeyRequest(pixId))
-
-                    //Deleta a chave pix selecionada
-                    repository.deleteById(request.pixId)
-
-                    responseObserver.onNext(
-                        RemoverChaveResponse.newBuilder()
-                            .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
-                            .build()
+                //Faz requisicao para deletar chave no banco central
+                bancoCentralClient.deletaChave(pixId, DeletePixKeyRequest(pixId)).let {
+                    if (it.status != HttpStatus.OK) responseObserver.onError(
+                        Status.INTERNAL.withDescription("Chave pix não pode ser deletada pelo Banco Central!")
+                            .asRuntimeException()
                     )
-                    responseObserver.onCompleted()
-
-                }catch (ex: HttpClientResponseException){
-                    when(ex.status.code){
-                        403 -> responseObserver.onError(Status.PERMISSION_DENIED .withDescription(ex.message) .asRuntimeException())
-                        404 -> responseObserver.onError(Status.NOT_FOUND .withDescription(ex.message) .asRuntimeException())
-                        else -> responseObserver.onError(Status.INTERNAL .withDescription(ex.message) .asRuntimeException())
-                    }
                 }
+
+                //Deleta a chave pix selecionada
+                repository.deleteById(request.pixId)
+
+                responseObserver.onNext(
+                    RemoverChaveResponse.newBuilder()
+                        .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
+                        .build()
+                )
+
+                responseObserver.onCompleted()
+
             }
         }
     }
