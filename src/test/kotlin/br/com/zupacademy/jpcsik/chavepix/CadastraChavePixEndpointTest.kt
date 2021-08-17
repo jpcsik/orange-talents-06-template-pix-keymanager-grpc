@@ -1,7 +1,7 @@
 package br.com.zupacademy.jpcsik.chavepix
 
 import br.com.zupacademy.jpcsik.*
-import br.com.zupacademy.jpcsik.clients.ItauClient
+import br.com.zupacademy.jpcsik.clients.*
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -9,6 +9,7 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions.*
@@ -22,16 +23,19 @@ import javax.inject.Singleton
 
 @MicronautTest(transactional = false)
 internal class CadastraChavePixEndpointTest(
-    @Inject val repository: ChavePixRepository,
-    @Inject val grpcClient: CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub
+    @Inject private val repository: ChavePixRepository,
+    @Inject private val grpcClient: CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub
 ) {
 
     @field:Inject
-    lateinit var itauClient: ItauClient
+    private lateinit var itauClient: ItauClient
+
+    @field:Inject
+    private lateinit var bancoCentralClient: BancoCentralClient
 
     private val contaResponsePadrao = ContaResponse(
         tipo = "CONTA_CORRENTE",
-        instituicao = mutableMapOf(Pair("nome", "Itau")),
+        instituicao = mutableMapOf(Pair("nome", "Itau"), Pair("ispb", "60701190")),
         agencia = "00000",
         numero = "11111",
         titular = mutableMapOf(Pair("nome", "Joao"), Pair("cpf", "12312312312"))
@@ -44,18 +48,32 @@ internal class CadastraChavePixEndpointTest(
         .setTipoConta(TipoConta.CONTA_CORRENTE)
         .build()
 
+
     @BeforeEach
     fun setup() {
         repository.deleteAll()
     }
 
+
     //Happy Path
     @Test
     fun `Deve cadastrar uma nova chave pix`() {
+        //cenario
+        val requestPadrao = NovaChavePixRequest.newBuilder()
+            .setClienteId(UUID.randomUUID().toString())
+            .setTipoChave(TipoChave.ALEATORIA)
+            .setValorChave("")
+            .setTipoConta(TipoConta.CONTA_CORRENTE)
+            .build()
+
         //acao
         Mockito
             .`when`(itauClient.consultaContas(requestPadrao.clienteId, requestPadrao.tipoConta.name))
             .thenReturn(HttpResponse.ok(contaResponsePadrao))
+
+        Mockito
+            .`when`(bancoCentralClient.criarChave(CreatePixKeyRequest(contaResponsePadrao, requestPadrao)))
+            .thenReturn(HttpResponse.created(CreatePixKeyResponse(UUID.randomUUID().toString())))
 
         val response = grpcClient.cadastrar(requestPadrao)
 
@@ -157,7 +175,7 @@ internal class CadastraChavePixEndpointTest(
     }
 
     @Test
-    fun `Nao deve cadastrar chave pix caso chave já exista`() {
+    fun `Nao deve cadastrar chave pix caso chave ja exista`() {
         //cenario
         repository.save(
             ChavePix(
@@ -202,7 +220,7 @@ internal class CadastraChavePixEndpointTest(
         //validacao
         with(erro){
             assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Cliente não encontrado!", status.description)
+            assertEquals("Conta não foi encontrada!", status.description)
         }
 
         assertTrue(repository.findAll().isEmpty())
@@ -212,6 +230,13 @@ internal class CadastraChavePixEndpointTest(
     @Test
     fun `Nao deve cadastrar caso ocorra erro no client`() {
         //acao
+        Mockito
+            .`when`(itauClient.consultaContas(requestPadrao.clienteId, requestPadrao.tipoConta.name))
+            .thenReturn(HttpResponse.ok(contaResponsePadrao))
+
+        Mockito
+            .`when`(bancoCentralClient.criarChave(CreatePixKeyRequest(contaResponsePadrao, requestPadrao)))
+            .thenReturn(HttpResponse.unprocessableEntity())
 
         val erro = assertThrows<StatusRuntimeException> {
             grpcClient.cadastrar(requestPadrao)
@@ -220,20 +245,61 @@ internal class CadastraChavePixEndpointTest(
         //validacao
         with(erro){
             assertEquals(Status.INTERNAL.code, status.code)
-            assertEquals("Erro interno do servidor!", status.description)
+            assertEquals("Erro ao registrar chave pix no Banco Central!", status.description)
         }
 
         assertTrue(repository.findAll().isEmpty())
 
     }
 
+    @Test
+    fun `Nao deve cadastrar uma nova chave pix caso servidor esteja indiponivel`() {
+        //cenario
+        val requestPadrao = NovaChavePixRequest.newBuilder()
+            .setClienteId(UUID.randomUUID().toString())
+            .setTipoChave(TipoChave.ALEATORIA)
+            .setValorChave("")
+            .setTipoConta(TipoConta.CONTA_CORRENTE)
+            .build()
+
+        //acao
+        Mockito
+            .`when`(itauClient.consultaContas(requestPadrao.clienteId, requestPadrao.tipoConta.name))
+            .thenReturn(HttpResponse.ok(contaResponsePadrao))
+
+        Mockito
+            .`when`(bancoCentralClient.criarChave(CreatePixKeyRequest(contaResponsePadrao, requestPadrao)))
+            .thenThrow(HttpClientException("Servidor indisponivel!"))
+
+        val erro = assertThrows<StatusRuntimeException> {
+            grpcClient.cadastrar(requestPadrao)
+        }
+
+        //validacao
+        with(erro) {
+            assertEquals(Status.UNAVAILABLE.code, status.code)
+            assertEquals("Servidor indisponivel!", status.description)
+        }
+
+        assertTrue(repository.findAll().isEmpty())
+
+    }
+
+
     @MockBean(ItauClient::class)
     fun itauMock(): ItauClient {
         return Mockito.mock(ItauClient::class.java)
     }
 
+
+    @MockBean(BancoCentralClient::class)
+    fun bancoCentralMock(): BancoCentralClient {
+        return Mockito.mock(BancoCentralClient::class.java)
+    }
+
+
     @Factory
-    private class ClientsCadastrar {
+    private class ClientCadastrar {
         @Singleton
         fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): CadastrarChaveServiceGrpc.CadastrarChaveServiceBlockingStub {
             return CadastrarChaveServiceGrpc.newBlockingStub(channel)
