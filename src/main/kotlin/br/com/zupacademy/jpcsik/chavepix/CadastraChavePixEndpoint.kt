@@ -1,68 +1,58 @@
 package br.com.zupacademy.jpcsik.chavepix
 
 import br.com.zupacademy.jpcsik.*
+import br.com.zupacademy.jpcsik.clients.BancoCentralClient
+import br.com.zupacademy.jpcsik.clients.CreatePixKeyRequest
 import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CadastraChavePixEndpoint(
     @Inject private val processador: ProcessadorNovaChaveRequest,
-    @Inject private val client: ItauClient
+    @Inject private val client: ItauClient,
+    @Inject private val bancoCentral: BancoCentralClient
 ) : CadastrarChaveServiceGrpc.CadastrarChaveServiceImplBase() {
 
     override fun cadastrar(request: NovaChavePixRequest, responseObserver: StreamObserver<NovaChavePixResponse>) {
         try {
-
-            //Metodo que valida os dados da requisicao
             request.validarRequest()
 
             //Faz a requisicao para capturar os dados da conta no servico externo
-            val contaResponse = client.consultaContas(request.clienteId, request.tipoConta.name)
+            client.consultaContas(request.clienteId, request.tipoConta.name).let {contaResponse ->
+                val contaBody = contaResponse.body() ?: throw NoSuchElementException("Conta não foi encontrada!")
 
-            //Classe responsavel por processar a requisicao
-            val response = processador.processar(request, contaResponse)
+                //Cria chave pix no servico externo do banco central
+                val bancoCentralResponse = bancoCentral.criarChave(CreatePixKeyRequest(contaBody, request))
 
-            //Resposde o client com a nova chave pix
-            responseObserver.onNext(response)
-
-            //Fecha o stream
+                //Classe responsavel por processar nova chave pix
+                processador.processar(request, contaBody, bancoCentralResponse)
+                    .let { responseObserver.onNext(it) }
+            }
             responseObserver.onCompleted()
 
-            //Tratamentos para as possiveis exceptions
-        } catch (ex: IllegalArgumentException) {
-
-            responseObserver.onError(
-                Status.INVALID_ARGUMENT
-                    .withDescription(ex.message)
-                    .asRuntimeException()
-            )
-
-        } catch (ex: IllegalStateException) {
-
-            responseObserver.onError(
-                Status.ALREADY_EXISTS
-                    .withDescription(ex.message)
-                    .asRuntimeException()
-            )
-
-        } catch (ex: NoSuchElementException) {
-
-            responseObserver.onError(
-                Status.NOT_FOUND
-                    .withDescription(ex.message)
-                    .asRuntimeException()
-            )
+        //Tratamentos para as possiveis exceptions
         } catch (ex: Exception) {
-
-            responseObserver.onError(
-                Status.INTERNAL
-                    .withDescription("Erro interno do servidor!")
-                    .asRuntimeException()
-            )
-
+            when (ex) {
+                is IllegalArgumentException -> responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(ex.message).asRuntimeException()
+                )
+                is IllegalStateException -> responseObserver.onError(
+                    Status.ALREADY_EXISTS.withDescription(ex.message).asRuntimeException()
+                )
+                is NoSuchElementException -> responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(ex.message).asRuntimeException()
+                )
+                is HttpClientResponseException -> when(ex.status.code){
+                    400 -> responseObserver.onError(Status.INVALID_ARGUMENT .withDescription(ex.message) .asRuntimeException())
+                    404 -> responseObserver.onError(Status.NOT_FOUND .withDescription(ex.message) .asRuntimeException())
+                    422 -> responseObserver.onError(Status.ALREADY_EXISTS .withDescription(ex.message) .asRuntimeException())
+                }
+                else -> responseObserver.onError(Status.INTERNAL.withDescription(ex.message).asRuntimeException())
+            }
         }
     }
 

@@ -25,13 +25,13 @@ fun NovaChavePixRequest.validarRequest() {
 }
 
 //Converte a request para a classe de dominio
-fun NovaChavePixRequest.toModel(conta: ContaAssociada): ChavePix {
+fun NovaChavePixRequest.toModel(conta: ContaAssociada, key: String): ChavePix {
     return ChavePix(
         clienteId = this.clienteId,
         tipoConta = this.tipoConta,
         tipoChave = this.tipoChave,
         conta = conta,
-        valorChave = if (this.tipoChave.number == 4) UUID.randomUUID().toString() else this.valorChave
+        valorChave = if (this.tipoChave.number == 4) key else this.valorChave
     )
 }
 

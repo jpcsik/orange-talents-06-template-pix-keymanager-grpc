@@ -1,6 +1,5 @@
 package br.com.zupacademy.jpcsik.clients
 
-import br.com.zupacademy.jpcsik.chavepix.ContaResponse
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable

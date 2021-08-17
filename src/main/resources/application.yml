@@ -16,3 +16,4 @@ jpa.default.properties.hibernate.hbm2ddl.auto: update
 
 clients:
   itau: http://localhost:9091/api/v1
+  banco-central: http://localhost:8082/api/v1/pix

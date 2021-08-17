@@ -44,6 +44,8 @@ dependencies {
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 
+    //XML
+    implementation("io.micronaut.xml:micronaut-jackson-xml")
 
     // testes
     runtimeOnly("com.h2database:h2")

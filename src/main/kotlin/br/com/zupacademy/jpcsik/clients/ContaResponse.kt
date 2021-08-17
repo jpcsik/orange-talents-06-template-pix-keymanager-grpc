@@ -1,4 +1,6 @@
-package br.com.zupacademy.jpcsik.chavepix
+package br.com.zupacademy.jpcsik.clients
+
+import br.com.zupacademy.jpcsik.chavepix.ContaAssociada
 
 data class ContaResponse(
     val tipo: String,
