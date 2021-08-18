@@ -8,6 +8,10 @@ import io.micronaut.http.client.annotation.Client
 @Client("\${clients.banco-central}")
 interface BancoCentralClient {
 
+    @Get("/keys/{key}")
+    @Produces(MediaType.APPLICATION_XML)
+    fun buscaChave(@PathVariable key: String): HttpResponse<PixKeyDetailsResponse>
+
     @Post("/keys")
     @Produces(MediaType.APPLICATION_XML)
     fun criarChave(@Body request: CreatePixKeyRequest): HttpResponse<CreatePixKeyResponse>

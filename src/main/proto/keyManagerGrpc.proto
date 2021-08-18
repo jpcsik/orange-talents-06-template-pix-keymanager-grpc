@@ -5,6 +5,8 @@ option java_package = "br.com.zupacademy.jpcsik";
 option java_outer_classname = "KeyManagerGrpc";
 option objc_class_prefix = "HLW";
 
+import "google/protobuf/timestamp.proto";
+
 package br.com.zupacademy.jpcsik;
 
 service CadastrarChaveService {
@@ -15,6 +17,49 @@ service RemoverChaveService {
   rpc removerChave (RemoverChaveRequest) returns (RemoverChaveResponse) {}
 }
 
+service BuscarChaveService {
+  rpc buscarChave (BuscarChaveRequest) returns (BuscarChaveResponse) {}
+}
+
+
+    /*
+      BUSCAR CHAVE
+     */
+
+message BuscarChaveRequest{
+  optional string pixId = 1;
+  optional string clienteId = 2;
+  optional string chave = 3;
+}
+
+message BuscarChaveResponse{
+
+  optional string clientId = 1;
+  optional string pixId = 2;
+  ChavePix chave = 3;
+
+  message ChavePix {
+    TipoChave tipo = 1;
+    string chave = 2;
+    DadosConta conta = 3;
+    google.protobuf.Timestamp criadaEm = 4;
+  }
+
+  message DadosConta {
+    TipoConta tipo = 1;
+    string instituicao = 2;
+    string agencia = 3;
+    string numero = 4;
+    string nomeTitular = 5;
+    string cpfDoTitular = 6;
+  }
+}
+
+
+    /*
+     REMOVER CHAVE
+     */
+
 message RemoverChaveRequest {
   string pixId = 1;
   string clienteId = 2;
@@ -23,6 +68,11 @@ message RemoverChaveRequest {
 message RemoverChaveResponse {
   string mensagem = 1;
 }
+
+
+    /*
+      CADASTRAR CHAVE
+     */
 
 message NovaChavePixRequest {
   string clienteId = 1;

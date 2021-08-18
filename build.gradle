@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "1.4.32"
     id("org.jetbrains.kotlin.plugin.jpa") version "1.4.32"
     id("com.google.protobuf") version "0.8.15"
+    id("org.jetbrains.kotlin.plugin.noarg") version "1.5.21"
 }
 
 version = "0.1"
@@ -90,7 +91,7 @@ sourceSets {
 protobuf {
     protoc { artifact = "com.google.protobuf:protoc:3.17.2" }
     plugins {
-        grpc { artifact = "io.grpc:protoc-gen-grpc-java:1.9.1" }
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:1.36.2" }
     }
     generateProtoTasks {
         all()*.plugins { grpc {} }

@@ -216,7 +216,7 @@ internal class RemoverChaveEndpointTest {
             assertEquals("Chave pix não pode ser deletada pelo Banco Central!", status.description)
         }
 
-        assertTrue(repository.findById(chavePix.pixId).isPresent)
+        assertTrue(repository.findById(chavePix.pixId!!).isPresent)
 
     }
 

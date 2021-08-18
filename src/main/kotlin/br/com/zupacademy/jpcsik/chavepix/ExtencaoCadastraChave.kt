@@ -31,7 +31,7 @@ fun NovaChavePixRequest.toModel(conta: ContaAssociada): ChavePix {
         tipoConta = this.tipoConta,
         tipoChave = this.tipoChave,
         conta = conta,
-        valorChave = if (this.tipoChave.number == 4) "SEM_VALOR" else this.valorChave
+        valorChave = if (this.tipoChave.number != 4) "SEM_VALOR" else this.valorChave
     )
 }
 

@@ -12,7 +12,7 @@ import javax.transaction.Transactional
 import kotlin.jvm.Throws
 
 @Singleton
-open class ProcessadorNovaChaveRequest(
+open class ProcessadorNovaChave(
     @Inject private val repository: ChavePixRepository,
     @Inject private val client: ItauClient,
     @Inject private val bancoCentral: BancoCentralClient

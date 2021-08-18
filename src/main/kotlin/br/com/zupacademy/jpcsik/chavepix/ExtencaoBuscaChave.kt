@@ -1,0 +1,93 @@
+package br.com.zupacademy.jpcsik.chavepix
+
+import br.com.zupacademy.jpcsik.BuscarChaveResponse
+import br.com.zupacademy.jpcsik.TipoChave
+import br.com.zupacademy.jpcsik.TipoConta
+import br.com.zupacademy.jpcsik.clients.PixKeyDetailsResponse
+import com.google.protobuf.Timestamp
+import io.micronaut.http.HttpStatus
+import java.time.ZoneId
+
+fun BuscaChavePixEndpoint.respondePorChave(chave: String): BuscarChaveResponse {
+
+    val possivelChave = repository.findByValorChave(chave)
+
+    return when {
+        possivelChave.isPresent -> {
+            respostaComChaveNoSistema(possivelChave.get())
+        }
+        else -> {
+            val buscaChaveResponse = bancoCentralClient.buscaChave(chave)
+
+            if(buscaChaveResponse.status == HttpStatus.OK){
+                respostaComChaveNoBCB(buscaChaveResponse.body()!!)
+            }else throw IllegalArgumentException("chave nao encontrada")
+        }
+    }
+
+}
+
+fun BuscaChavePixEndpoint.respondePorId(pixId: String, clienteId: String): BuscarChaveResponse {
+
+    val possivelChave = repository.findByPixIdAndClienteId(pixId, clienteId)
+
+    if(possivelChave.isPresent && possivelChave.get().valorChave != "SEM_VALOR"){
+        return respostaComChaveNoSistema(possivelChave.get())
+    }else throw IllegalArgumentException("chave nao encontrada")
+
+}
+
+fun respostaComChaveNoSistema(chavePix: ChavePix): BuscarChaveResponse {
+
+    return BuscarChaveResponse.newBuilder()
+        .setPixId(chavePix.pixId)
+        .setClientId(chavePix.clienteId)
+        .setChave(BuscarChaveResponse.ChavePix.newBuilder()
+            .setTipo(chavePix.tipoChave)
+            .setChave(chavePix.valorChave)
+            .setCriadaEm(chavePix.criadaEm.atZone(ZoneId.of("UTC")).toInstant().let { Timestamp.newBuilder()
+                .setSeconds(it.epochSecond)
+                .setNanos(it.nano)
+                .build()})
+            .setConta(BuscarChaveResponse.DadosConta.newBuilder()
+                .setInstituicao(chavePix.conta.instituicao)
+                .setAgencia(chavePix.conta.agencia)
+                .setNumero(chavePix.conta.numero)
+                .setTipo(chavePix.tipoConta)
+                .setNomeTitular(chavePix.conta.nomeTitular)
+                .setCpfDoTitular(chavePix.conta.cpfTitular)
+                .build()
+            )
+        )
+        .build()
+}
+
+fun respostaComChaveNoBCB(pixKeyDetailsResponse: PixKeyDetailsResponse): BuscarChaveResponse {
+
+    return BuscarChaveResponse.newBuilder()
+        .setChave(BuscarChaveResponse.ChavePix.newBuilder()
+            .setTipo(when(pixKeyDetailsResponse.keyType){
+                "CPF" -> TipoChave.CPF
+                "PHONE" -> TipoChave.TELEFONE
+                "EMAIL" -> TipoChave.EMAIL
+                "RANDOM" -> TipoChave.ALEATORIA
+                else -> TipoChave.CHAVE_DESCONHECIDA
+            })
+            .setChave(pixKeyDetailsResponse.key)
+            .setCriadaEm(pixKeyDetailsResponse.createdAt)
+            .setConta(BuscarChaveResponse.DadosConta.newBuilder()
+                .setInstituicao("ITAÚ UNIBANCO S.A.")
+                .setAgencia(pixKeyDetailsResponse.bankAccount.branch)
+                .setNumero(pixKeyDetailsResponse.bankAccount.accountNumber)
+                .setTipo(when(pixKeyDetailsResponse.bankAccount.accountType){
+                    "CCAC" -> TipoConta.CONTA_CORRENTE
+                    "SVGS" -> TipoConta.CONTA_POUPANCA
+                    else -> TipoConta.CONTA_DESCONHECIDA
+                })
+                .setNomeTitular(pixKeyDetailsResponse.owner.name)
+                .setCpfDoTitular(pixKeyDetailsResponse.owner.taxIdNumber)
+                .build()
+            )
+        )
+        .build()
+}

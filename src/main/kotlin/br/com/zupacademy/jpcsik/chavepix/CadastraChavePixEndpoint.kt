@@ -2,17 +2,15 @@ package br.com.zupacademy.jpcsik.chavepix
 
 import br.com.zupacademy.jpcsik.*
 import br.com.zupacademy.jpcsik.clients.BancoCentralClient
-import br.com.zupacademy.jpcsik.clients.CreatePixKeyRequest
 import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
-import io.micronaut.http.client.exceptions.HttpClientResponseException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CadastraChavePixEndpoint(
-    @Inject private val processador: ProcessadorNovaChaveRequest,
+    @Inject private val processador: ProcessadorNovaChave,
     @Inject private val client: ItauClient,
     @Inject private val bancoCentral: BancoCentralClient
 ) : CadastrarChaveServiceGrpc.CadastrarChaveServiceImplBase() {
