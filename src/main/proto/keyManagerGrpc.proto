@@ -21,6 +21,34 @@ service BuscarChaveService {
   rpc buscarChave (BuscarChaveRequest) returns (BuscarChaveResponse) {}
 }
 
+service ListarChavesService {
+  rpc listarChaves (ListaChavesRequest) returns (ListaChavesResponse) {}
+}
+
+
+    /*
+    LISTAR CHAVES
+    */
+
+message ListaChavesRequest {
+  string clienteId = 1;
+}
+
+message ListaChavesResponse {
+
+  string clienteId = 1;
+  repeated ChavePix chaves = 2;
+
+  message ChavePix {
+    string pixId = 1;
+    TipoChave tipoChave = 2;
+    string valorChave = 3;
+    TipoConta tipoConta = 4;
+    google.protobuf.Timestamp criadaEm = 5;
+  }
+
+}
+
 
     /*
       BUSCAR CHAVE
