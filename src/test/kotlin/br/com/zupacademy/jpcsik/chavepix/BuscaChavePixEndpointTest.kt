@@ -72,9 +72,9 @@ internal class BuscaChavePixEndpointTest(
         //validacao
         with(response) {
             assertNotNull(this)
-            assertEquals(chavePix.pixId, response.pixId)
-            assertEquals(chavePix.valorChave, response.chave.chave)
-            assertEquals(chavePix.conta.nomeTitular, response.chave.conta.nomeTitular)
+            assertEquals(chavePix.pixId, pixId)
+            assertEquals(chavePix.valorChave, chave.chave)
+            assertEquals(chavePix.conta.nomeTitular, chave.conta.nomeTitular)
         }
 
     }
@@ -94,9 +94,9 @@ internal class BuscaChavePixEndpointTest(
         //validacao
         with(response) {
             assertNotNull(this)
-            assertEquals(chavePix.pixId, response.pixId)
-            assertEquals(chavePix.valorChave, response.chave.chave)
-            assertEquals(chavePix.conta.nomeTitular, response.chave.conta.nomeTitular)
+            assertEquals(chavePix.pixId, pixId)
+            assertEquals(chavePix.valorChave, chave.chave)
+            assertEquals(chavePix.conta.nomeTitular, chave.conta.nomeTitular)
         }
     }
 
@@ -130,11 +130,11 @@ internal class BuscaChavePixEndpointTest(
         //validacao
         with(response) {
             assertNotNull(this)
-            assertTrue(response.pixId.isEmpty())
-            assertEquals("ITAÚ UNIBANCO S.A.", response.chave.conta.instituicao)
-            assertEquals(chavePix.tipoConta, response.chave.conta.tipo)
-            assertEquals(chavePix.valorChave, response.chave.chave)
-            assertEquals(chavePix.conta.nomeTitular, response.chave.conta.nomeTitular)
+            assertTrue(pixId.isEmpty())
+            assertEquals("ITAÚ UNIBANCO S.A.", chave.conta.instituicao)
+            assertEquals(chavePix.tipoConta, chave.conta.tipo)
+            assertEquals(chavePix.valorChave, chave.chave)
+            assertEquals(chavePix.conta.nomeTitular, chave.conta.nomeTitular)
         }
 
 
@@ -156,8 +156,8 @@ internal class BuscaChavePixEndpointTest(
 
         //validacao
         with(erro){
-            assertEquals(Status.INVALID_ARGUMENT.code , erro.status.code)
-            assertEquals("Dados inválidos ou incompletos!", erro.status.description)
+            assertEquals(Status.INVALID_ARGUMENT.code , status.code)
+            assertEquals("Dados inválidos ou incompletos!", status.description)
         }
 
     }
@@ -177,8 +177,8 @@ internal class BuscaChavePixEndpointTest(
 
         //validacao
         with(erro){
-            assertEquals(Status.NOT_FOUND.code , erro.status.code)
-            assertEquals("chave nao encontrada", erro.status.description)
+            assertEquals(Status.NOT_FOUND.code , status.code)
+            assertEquals("chave nao encontrada", status.description)
         }
     }
 
@@ -202,8 +202,8 @@ internal class BuscaChavePixEndpointTest(
 
         //validacao
         with(erro){
-            assertEquals(Status.INTERNAL.code , erro.status.code)
-            assertEquals("Erro ao buscar chave pix no Banco Central!", erro.status.description)
+            assertEquals(Status.INTERNAL.code , status.code)
+            assertEquals("Erro ao buscar chave pix no Banco Central!", status.description)
         }
     }
 
@@ -225,7 +225,7 @@ internal class BuscaChavePixEndpointTest(
 
         //validacao
         with(erro){
-            assertEquals(Status.UNAVAILABLE.code , erro.status.code)
+            assertEquals(Status.UNAVAILABLE.code , status.code)
         }
     }
 
@@ -247,7 +247,7 @@ internal class BuscaChavePixEndpointTest(
 
         //validacao
         with(erro){
-            assertEquals("chave nao encontrada", erro.message)
+            assertEquals("chave nao encontrada", message)
         }
 
     }
