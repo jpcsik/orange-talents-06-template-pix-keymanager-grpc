@@ -7,5 +7,6 @@ enum class ValidadorChaveRegex(private val regex: Regex) {
     TELEFONE("^+[1-9][0-9]\\d{1,14}\$".toRegex()),
     UUID("[a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8}".toRegex());
 
+    //Validacao para cada tipo de chave
     fun validar(value: String): Boolean = value.matches(this.regex)
 }

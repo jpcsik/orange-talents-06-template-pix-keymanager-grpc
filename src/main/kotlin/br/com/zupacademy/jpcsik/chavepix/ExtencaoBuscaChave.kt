@@ -8,6 +8,7 @@ import com.google.protobuf.Timestamp
 import io.micronaut.http.HttpStatus
 import java.time.ZoneId
 
+//Caso nao ache a chave no banco de dados esse metodo tenta procurar a chave no sistema externo do banco central
 fun BuscaChavePixEndpoint.respondePorChave(chave: String): BuscarChaveResponse {
 
     val possivelChave = repository.findByValorChave(chave)
@@ -27,6 +28,7 @@ fun BuscaChavePixEndpoint.respondePorChave(chave: String): BuscarChaveResponse {
 
 }
 
+//Caso nao ache a chave ou a chave nao tenha valor esse metodo joga uma exception para ser tratada no endpoint
 fun BuscaChavePixEndpoint.respondePorId(pixId: String, clienteId: String): BuscarChaveResponse {
 
     val possivelChave = repository.findByPixIdAndClienteId(pixId, clienteId)
@@ -37,6 +39,7 @@ fun BuscaChavePixEndpoint.respondePorId(pixId: String, clienteId: String): Busca
 
 }
 
+//Cria o objeto de response a partir de uma chave pix do sistema
 fun respostaComChaveNoSistema(chavePix: ChavePix): BuscarChaveResponse {
 
     return BuscarChaveResponse.newBuilder()
@@ -62,6 +65,7 @@ fun respostaComChaveNoSistema(chavePix: ChavePix): BuscarChaveResponse {
         .build()
 }
 
+//Cria o objeto de resposta a partir da resposta do sistema externo do banco central
 fun respostaComChaveNoBCB(pixKeyDetailsResponse: PixKeyDetailsResponse): BuscarChaveResponse {
 
     return BuscarChaveResponse.newBuilder()

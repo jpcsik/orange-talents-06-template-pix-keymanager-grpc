@@ -19,15 +19,19 @@ class BuscaChavePixEndpoint(
     override fun buscarChave(request: BuscarChaveRequest, responseObserver: StreamObserver<BuscarChaveResponse>) {
 
         try {
+            //Valida se request veio com os ids validos
             if (ValidadorChaveRegex.UUID.validar(request.pixId) && ValidadorChaveRegex.UUID.validar(request.clienteId)) {
 
+                //Metodo que faz as devidas verificacoes e cria a resposta
                 respondePorId(request.pixId, request.clienteId).let {
                     responseObserver.onNext(it)
                     responseObserver.onCompleted()
                 }
 
+            //Valida se request veio com a chave, caso nao tenha ids
             } else if (request.chave.isNotBlank()) {
 
+                //Metodo que faz as devidas verificacoes e cria a resposta
                 respondePorChave(request.chave).let {
                     responseObserver.onNext(it)
                     responseObserver.onCompleted()
@@ -35,8 +39,10 @@ class BuscaChavePixEndpoint(
 
             }
 
+            //Responde com um erro caso nada venha preenchido na request ou os dados sejam invalidos
             else responseObserver.onError(Status.INVALID_ARGUMENT .withDescription("Dados inválidos ou incompletos!") .asRuntimeException())
 
+        //Trata as possiveis exceptions esperadas pelo sistema
         } catch (ex: Exception) {
             when (ex) {
                 is IllegalArgumentException -> responseObserver.onError(
