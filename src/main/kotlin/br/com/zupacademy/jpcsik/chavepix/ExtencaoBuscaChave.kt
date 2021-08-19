@@ -70,8 +70,7 @@ fun respostaComChaveNoBCB(pixKeyDetailsResponse: PixKeyDetailsResponse): BuscarC
                 "CPF" -> TipoChave.CPF
                 "PHONE" -> TipoChave.TELEFONE
                 "EMAIL" -> TipoChave.EMAIL
-                "RANDOM" -> TipoChave.ALEATORIA
-                else -> TipoChave.CHAVE_DESCONHECIDA
+                else -> TipoChave.ALEATORIA
             })
             .setChave(pixKeyDetailsResponse.key)
             .setCriadaEm(pixKeyDetailsResponse.createdAt)
@@ -80,9 +79,8 @@ fun respostaComChaveNoBCB(pixKeyDetailsResponse: PixKeyDetailsResponse): BuscarC
                 .setAgencia(pixKeyDetailsResponse.bankAccount.branch)
                 .setNumero(pixKeyDetailsResponse.bankAccount.accountNumber)
                 .setTipo(when(pixKeyDetailsResponse.bankAccount.accountType){
-                    "CCAC" -> TipoConta.CONTA_CORRENTE
-                    "SVGS" -> TipoConta.CONTA_POUPANCA
-                    else -> TipoConta.CONTA_DESCONHECIDA
+                    "CACC" -> TipoConta.CONTA_CORRENTE
+                    else -> TipoConta.CONTA_POUPANCA
                 })
                 .setNomeTitular(pixKeyDetailsResponse.owner.name)
                 .setCpfDoTitular(pixKeyDetailsResponse.owner.taxIdNumber)

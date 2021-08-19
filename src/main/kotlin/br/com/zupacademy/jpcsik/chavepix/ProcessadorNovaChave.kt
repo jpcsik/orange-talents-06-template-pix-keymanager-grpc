@@ -33,7 +33,7 @@ open class ProcessadorNovaChave(
 
         //Verifica se chave já existe
         repository.existsByValorChave(novaChave.valorChave)
-            .let { if (it) throw IllegalAccessException("Chave já cadastrada!") }
+            .let { if (it && novaChave.valorChave != "SEM_VALOR") throw IllegalAccessException("Chave já cadastrada!") }
 
         //Salva chave no banco de dados
         repository.save(novaChave)

@@ -24,7 +24,7 @@ class ChavePix(
     val conta: ContaAssociada,
 
     @field:Size(max = 77)
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var valorChave: String
 ) {
     @Id
