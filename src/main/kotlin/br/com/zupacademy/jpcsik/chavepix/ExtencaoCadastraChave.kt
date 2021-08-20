@@ -32,6 +32,13 @@ fun NovaChavePixRequest.toModel(conta: ContaAssociada): ChavePix {
         tipoChave = this.tipoChave,
         conta = conta,
         valorChave = if (this.tipoChave.number == 4) "SEM_VALOR" else this.valorChave
+                /*
+                A ideia aqui seria salvar as chaves,
+                mesmo se houvesse falha ao gerar a chave aleatoria com o servico do banco central,
+                 para posteriormente o sistema gerar essas chaves automaticamente,
+                 atraves de um metodo agendado,
+                 tirando a necessidade do usuario fazer outra requisicao
+                 */
     )
 }
 

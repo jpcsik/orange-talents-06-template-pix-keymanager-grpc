@@ -23,7 +23,7 @@ class CadastraChavePixEndpoint(
             processador.processar(request).let { responseObserver.onNext(it) }
             responseObserver.onCompleted()
 
-            //Tratamentos para as possiveis exceptions
+        //Tratamentos para as possiveis exceptions
         } catch (ex: Exception) {
             when (ex) {
                 is IllegalArgumentException -> responseObserver.onError(

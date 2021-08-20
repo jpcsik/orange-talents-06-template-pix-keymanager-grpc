@@ -1,7 +1,7 @@
 
 micronaut:
   application:
-    name: chavepix
+    name: key-manager-grpc
 
 datasources:
   default:

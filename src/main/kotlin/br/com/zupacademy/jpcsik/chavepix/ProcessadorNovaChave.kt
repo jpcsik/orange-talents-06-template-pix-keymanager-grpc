@@ -35,6 +35,10 @@ open class ProcessadorNovaChave(
         repository.existsByValorChave(novaChave.valorChave)
             .let { if (it && novaChave.valorChave != "SEM_VALOR") throw IllegalAccessException("Chave já cadastrada!") }
 
+        //Verifica se existe ja existe uma chave para o tipo
+        repository.existsByClienteIdAndTipoChave(novaChave.clienteId, novaChave.tipoChave)
+            .let { if(it) throw IllegalAccessException("Já existe uma chave para esse tipo!") }
+
         //Salva chave no banco de dados
         repository.save(novaChave)
 
