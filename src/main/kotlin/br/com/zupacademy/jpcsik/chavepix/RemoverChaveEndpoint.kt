@@ -1,14 +1,13 @@
 package br.com.zupacademy.jpcsik.chavepix
 
-import br.com.zupacademy.jpcsik.*
-import br.com.zupacademy.jpcsik.chavepix.ChavePixRepository
-import br.com.zupacademy.jpcsik.chavepix.ValidadorChaveRegex
+import br.com.zupacademy.jpcsik.RemoverChaveRequest
+import br.com.zupacademy.jpcsik.RemoverChaveResponse
+import br.com.zupacademy.jpcsik.RemoverChaveServiceGrpc
 import br.com.zupacademy.jpcsik.clients.BancoCentralClient
 import br.com.zupacademy.jpcsik.clients.DeletePixKeyRequest
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.client.exceptions.HttpClientResponseException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional

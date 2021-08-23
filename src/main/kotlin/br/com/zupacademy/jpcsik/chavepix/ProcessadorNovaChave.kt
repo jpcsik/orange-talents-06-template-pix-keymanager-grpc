@@ -2,14 +2,13 @@ package br.com.zupacademy.jpcsik.chavepix
 
 import br.com.zupacademy.jpcsik.NovaChavePixRequest
 import br.com.zupacademy.jpcsik.NovaChavePixResponse
-import br.com.zupacademy.jpcsik.clients.*
-import io.micronaut.http.HttpResponse
+import br.com.zupacademy.jpcsik.clients.BancoCentralClient
+import br.com.zupacademy.jpcsik.clients.CreatePixKeyRequest
+import br.com.zupacademy.jpcsik.clients.ItauClient
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.client.exceptions.HttpClientException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional
-import kotlin.jvm.Throws
 
 @Singleton
 open class ProcessadorNovaChave(

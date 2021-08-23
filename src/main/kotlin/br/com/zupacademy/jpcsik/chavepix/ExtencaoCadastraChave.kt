@@ -1,7 +1,6 @@
 package br.com.zupacademy.jpcsik.chavepix
 
-import br.com.zupacademy.jpcsik.*
-import java.util.*
+import br.com.zupacademy.jpcsik.NovaChavePixRequest
 
 //Valida os diversos cenarios da request
 @Throws(IllegalArgumentException::class)
@@ -35,9 +34,9 @@ fun NovaChavePixRequest.toModel(conta: ContaAssociada): ChavePix {
                 /*
                 A ideia aqui seria salvar as chaves,
                 mesmo se houvesse falha ao gerar a chave aleatoria com o servico do banco central,
-                 para posteriormente o sistema gerar essas chaves automaticamente,
-                 atraves de um metodo agendado,
-                 tirando a necessidade do usuario fazer outra requisicao
+                para posteriormente o sistema gerar essas chaves automaticamente,
+                atraves de um metodo agendado,
+                tirando a necessidade do usuario fazer outra requisicao
                  */
     )
 }

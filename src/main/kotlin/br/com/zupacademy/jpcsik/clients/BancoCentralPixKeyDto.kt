@@ -1,8 +1,6 @@
 package br.com.zupacademy.jpcsik.clients
 
 import br.com.zupacademy.jpcsik.NovaChavePixRequest
-import br.com.zupacademy.jpcsik.TipoChave
-import br.com.zupacademy.jpcsik.TipoConta
 import com.google.protobuf.Timestamp
 
 data class CreatePixKeyRequest(

@@ -1,9 +1,10 @@
 package br.com.zupacademy.jpcsik.chavepix
 
-import br.com.zupacademy.jpcsik.*
+import br.com.zupacademy.jpcsik.RemoverChaveRequest
+import br.com.zupacademy.jpcsik.RemoverChaveServiceGrpc
+import br.com.zupacademy.jpcsik.TipoChave
+import br.com.zupacademy.jpcsik.TipoConta
 import br.com.zupacademy.jpcsik.clients.BancoCentralClient
-import br.com.zupacademy.jpcsik.clients.CreatePixKeyRequest
-import br.com.zupacademy.jpcsik.clients.CreatePixKeyResponse
 import br.com.zupacademy.jpcsik.clients.DeletePixKeyRequest
 import io.grpc.ManagedChannel
 import io.grpc.Status
