@@ -71,7 +71,7 @@ internal class RemoverChaveEndpointTest {
 
         //acao
         Mockito
-            .`when`(bancoCentralClient.deletaChave(request.pixId, DeletePixKeyRequest(request.pixId)))
+            .`when`(bancoCentralClient.deletaChave(chavePix.valorChave, DeletePixKeyRequest(request.pixId)))
             .thenReturn(HttpResponse.ok())
 
         val response = grpcClient.removerChave(request)
@@ -203,7 +203,7 @@ internal class RemoverChaveEndpointTest {
 
         //acao
         Mockito
-            .`when`(bancoCentralClient.deletaChave(request.pixId, DeletePixKeyRequest(request.pixId)))
+            .`when`(bancoCentralClient.deletaChave(chavePix.valorChave, DeletePixKeyRequest(request.pixId)))
             .thenReturn(HttpResponse.serverError())
 
         val erro = assertThrows<StatusRuntimeException> {

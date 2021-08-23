@@ -50,26 +50,27 @@ open class RemoverChaveEndpoint(
             }
 
             possivelChave.isPresent -> {
-                val pixId = possivelChave.get().pixId!!
+                val chave = possivelChave.get()
 
                 //Faz requisicao para deletar chave no banco central
-                bancoCentralClient.deletaChave(pixId, DeletePixKeyRequest(pixId)).let {
+                bancoCentralClient.deletaChave(chave.valorChave, DeletePixKeyRequest(chave.pixId!!)).let {
                     if (it.status != HttpStatus.OK) responseObserver.onError(
                         Status.INTERNAL.withDescription("Chave pix não pode ser deletada pelo Banco Central!")
                             .asRuntimeException()
                     )
+
+                    //Deleta a chave pix selecionada
+                    repository.deleteById(request.pixId)
+
+                    responseObserver.onNext(
+                        RemoverChaveResponse.newBuilder()
+                            .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
+                            .build()
+                    )
+
+                    responseObserver.onCompleted()
+
                 }
-
-                //Deleta a chave pix selecionada
-                repository.deleteById(request.pixId)
-
-                responseObserver.onNext(
-                    RemoverChaveResponse.newBuilder()
-                        .setMensagem("Chave Pix: ${request.pixId} , deletada com sucesso!")
-                        .build()
-                )
-
-                responseObserver.onCompleted()
 
             }
         }
