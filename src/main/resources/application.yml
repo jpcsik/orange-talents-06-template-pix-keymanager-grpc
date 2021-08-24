@@ -5,15 +5,15 @@ micronaut:
 
 datasources:
   default:
-    url: jdbc:postgresql://localhost:5432/chavepix
+    url: ${DB_URI:`jdbc:postgresql://localhost:5432/chavepix`}
     driverClassName: org.postgresql.Driver
-    username: postgres
-    password: password
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
     schema-generate: CREATE_DROP
     dialect: POSTGRES
 
 jpa.default.properties.hibernate.hbm2ddl.auto: update
 
 clients:
-  itau: http://localhost:9091/api/v1
-  banco-central: http://localhost:8082/api/v1/pix
+  itau: ${ITAU_CLIENT_URI:`http://localhost:9091/api/v1`}
+  banco-central: ${BCB_CLIENT_URI:`http://localhost:8082/api/v1/pix`}
